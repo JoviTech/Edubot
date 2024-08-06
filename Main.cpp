@@ -1,114 +1,88 @@
 /*
  * EDUBOT HELLO WORLD EXAMPLE
  * @Author: Maik Basso <maik@maikbasso.com.br>
-*/
+ */
 
 #include <iostream>
+
 #include "libs/EdubotLib.hpp"
 
-int main(){
+#define MIN_PAREDE 0.04
+#define VELOCIDADE 0.4
+#define TEMPO 10000
 
-	EdubotLib *edubotLib = new EdubotLib();
+int main() {
+  int a = 0;
+  EdubotLib *edubotLib = new EdubotLib();
 
-	//try to connect on robot
-	if(edubotLib->connect()){
+  // try to connect on robot
+  if (edubotLib->connect()) a = 1;
+  if (a) {
+    // shows edubot sensors
+    int showSensorsTimes = 1;
+    int conta_gyro = 0;
 
-		// shows edubot sensors
-		int showSensorsTimes = 10;
-		while (showSensorsTimes > 0) {
+    while (a) {
+      std::cout << "Teste ";
+      while (edubotLib->getSonar(6) <= MIN_PAREDE &&
+             edubotLib->getSonar(3) >= MIN_PAREDE) {
+        edubotLib->move(VELOCIDADE);
+        edubotLib->sleepMilliseconds(TEMPO);
+      }
 
-			// Waits for two seconds
-			edubotLib->sleepMilliseconds(2000);
+      if (edubotLib->getSonar(6) <= MIN_PAREDE &&
+          edubotLib->getSonar(3) <= MIN_PAREDE) {
+        edubotLib->rotate(-90);
+        edubotLib->sleepMilliseconds(TEMPO);
+        conta_gyro = conta_gyro - 1;
+      }
 
-			// sonars
-			for (int i=0; i<7; i++) {
-				std::cout << "S" << i << ": " << edubotLib->getSonar(i) << "m, ";
-			}
+      if (edubotLib->getSonar(6) >= MIN_PAREDE) {
+        edubotLib->rotate(90);
+        edubotLib->sleepMilliseconds(TEMPO);
+        conta_gyro = conta_gyro + 1;
+        edubotLib->move(VELOCIDADE);
+        edubotLib->sleepMilliseconds(TEMPO);
+      }
+    }
+    while (showSensorsTimes > 0) {
+      // Waits for two seconds
+      edubotLib->sleepMilliseconds(2000);
 
-			// bumpers
-			for (int i=0; i<4; i++) {
-				std::cout << "B" << i << ": " << (edubotLib->getBumper(i) == true? "true":"false") << ", ";
-			}
+      // sonars
+      for (int i = 0; i < 7; i++) {
+        std::cout << "S" << i << ": " << edubotLib->getSonar(i) << "m, ";
+      }
 
-			std::cout << "leftcount: " << edubotLib->getEncoderCountLeft() << ", ";
-			std::cout << "rightcount: " << edubotLib->getEncoderCountRight() << ", ";
-			std::cout << "dt(looptime): " << edubotLib->getEncoderCountDT() << ", ";
-			
-			std::cout << "x: " << edubotLib->getX() << ", ";
-			std::cout << "y: " << edubotLib->getY() << ", ";
-			std::cout << "theta: " << edubotLib->getTheta() << ", ";
-			
-			std::cout << "battCell0: " << edubotLib->getBatteryCellVoltage(0) << ", ";
-			std::cout << "battCell1: " << edubotLib->getBatteryCellVoltage(1) << ", ";
-			std::cout << "battCell2: " << edubotLib->getBatteryCellVoltage(2);
+      // bumpers
+      for (int i = 0; i < 4; i++) {
+        std::cout << "B" << i << ": "
+                  << (edubotLib->getBumper(i) == true ? "true" : "false")
+                  << ", ";
+      }
 
-			// line break
-			std::cout << std::endl;
+      std::cout << "leftcount: " << edubotLib->getEncoderCountLeft() << ", ";
+      std::cout << "rightcount: " << edubotLib->getEncoderCountRight() << ", ";
+      std::cout << "dt(looptime): " << edubotLib->getEncoderCountDT() << ", ";
 
-			showSensorsTimes--;
+      std::cout << "x: " << edubotLib->getX() << ", ";
+      std::cout << "y: " << edubotLib->getY() << ", ";
+      std::cout << "theta: " << edubotLib->getTheta() << ", ";
 
-		}
+      std::cout << "battCell0: " << edubotLib->getBatteryCellVoltage(0) << ", ";
+      std::cout << "battCell1: " << edubotLib->getBatteryCellVoltage(1) << ", ";
+      std::cout << "battCell2: " << edubotLib->getBatteryCellVoltage(2);
 
-		while(edubotLib->connect()){
+      // line break
+      std::cout << std::endl;
 
-			if(getSonar(6)<0.2 && getSonar(3)>0.2){
-				edubotLib->move(0.3);
-			}else{
-				if(getSonar(6)>0.2){
-					edubotLib->rotate(90);
-				}
-				if(getSonar(3)<0.2){
-					edubotLib->rotate(-90);
-				}
-			}
-			
-		}
-		
+      showSensorsTimes--;
+    }
 
-		/*
-		 * Function move
-		 * Parameter velocity (-1.0, 1.0)
-		 * Positive values move forward, negative values move backward
-		*/
-		edubotLib->move(0.3);
-		// Waits for two seconds for processes to reflect on the robot
-		edubotLib->sleepMilliseconds(2000);
+    // edubotLib->disconnect();
+  } else {
+    std::cout << "Could not connect on robot!" << std::endl;
+  }
 
-		/*
-		 * Function rotate
-		 * Parameter angle (-180, 180)
-		 * Positive values rotate right, negative values rotate left
-		*/
-		edubotLib->rotate(90);
-		// Waits for two seconds for processes to reflect on the robot
-		edubotLib->sleepMilliseconds(2000);
-
-		/*
-		 * Function neutral
-		 * put the motors in the neutral state
-		*/
-		edubotLib->neutral();
-		// Waits for two seconds for processes to reflect on the robot
-		edubotLib->sleepMilliseconds(2000);
-
-		/*
-		 * Function stop
-		 * Stop the motors / break
-		*/
-		edubotLib->stop();
-		// Waits for two seconds for processes to reflect on the robot
-		edubotLib->sleepMilliseconds(2000);
-
-		/*
-		 * Function disconnect
-		 * disconnect from robot
-		 * Important to user EVER
-		*/
-		edubotLib->disconnect();
-	}
-	else{
-		std::cout << "Could not connect on robot!" << std::endl;
-	}
-
-	return 0;
+  return 0;
 }
